@@ -1,0 +1,56 @@
+## QUESTION 1 PART A:
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+rdata= yf.download('RELIANCE.NS', start='2023-04-01', end='2024-03-31')
+
+rdata.to_csv('rdata.csv')
+
+close=np.array(rdata.Close)
+open=np.array(rdata.Open)
+end_capital=open.copy()
+
+end_capital[0]=(100000/open[0])*close[0]
+for i in range(0,len(open)-1):
+    end_capital[i+1]=(end_capital[i]/open[i+1])*close[i+1]
+    
+df=pd.DataFrame(end_capital)
+df.to_csv('endc1.csv')
+
+print("Final capital is ",end_capital[-1])
+
+#### QUESTION 1 PART B:
+returns=open.copy()
+returns[0]=end_capital[0]-100000
+for i in range(0,len(returns)-1):
+    returns[i+1]=end_capital[i+1]-end_capital[i]
+returnsp=open.copy()
+returnsp[0]=(returns[0]/100000)*100
+for i in range(0,len(open)-1):
+    returnsp[i+1]=(returns[i+1]/end_capital[i])*100
+rdata['returnsp']=returnsp
+print("The percentage returns of everyday is " ,rdata['returnsp'])
+#taking risk free return zero
+sharpe_ratio=returnsp.mean()/returnsp.std()
+print("The sharpe ratio is " ,sharpe_ratio)
+
+
+# plt.plot(end_capital)  
+# plt.show()
+min=end_capital[0]
+max=end_capital[0]
+for i in range(0,len(end_capital)):
+
+    if(end_capital[i]<min):
+        min=end_capital[i]
+        
+for i in range(0,150):
+
+    if(end_capital[i]>max):
+        max=end_capital[i]
+
+MDD=(min-max)*100/max
+print("The maximum drawdown is " ,MDD,"%")
+
+

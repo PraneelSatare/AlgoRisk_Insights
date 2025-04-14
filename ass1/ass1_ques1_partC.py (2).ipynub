@@ -1,0 +1,49 @@
+#QUESTION 1 PART C:
+
+import yfinance as yf
+import pandas as pd
+import numpy as np
+ndata= yf.download('^NSEI', start='2023-04-01', end='2024-03-31')
+ndata.to_csv('ndata.csv')
+close=np.array(ndata.Close)
+open=np.array(ndata.Open)
+end_capital=open.copy()
+
+end_capital[0]=(100000/open[0])*close[0]
+for i in range(0,len(open)-1):
+    end_capital[i+1]=(end_capital[i]/open[i+1])*close[i+1]
+    
+df=pd.DataFrame(end_capital)
+df.to_csv('endc2.csv')
+print(end_capital[-1])
+
+returns=open.copy()
+returns[0]=end_capital[0]-100000
+for i in range(0,len(returns)-1):
+    returns[i+1]=end_capital[i+1]-end_capital[i]
+returnsp=open.copy()
+returnsp[0]=(returns[0]/100000)*100
+for i in range(0,len(open)-1):
+    returnsp[i+1]=(returns[i+1]/end_capital[i])*100
+
+ndata['returnsp']=returnsp
+print("The percentage returns of everyday is " ,ndata['returnsp'])
+sharpe_ratio=returnsp.mean()/returnsp.std()
+print("The sharpe ratio is " ,sharpe_ratio)
+
+
+# plt.plot(end_capital)  
+# plt.show()
+min=end_capital[0]
+max=end_capital[0]
+for i in range(0,len(end_capital)):
+
+    if(end_capital[i]<min):
+        min=end_capital[i]
+        
+    if(end_capital[i]>max):
+        max=end_capital[i]
+
+MDD=(min-max)*100/max
+print("The maximum drawdown is " ,MDD,"%")
+
